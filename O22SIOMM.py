@@ -11,14 +11,13 @@ class O22MMP:
         self.tlabel = 1
 
     def SetHDDigitalPointState(self, module, channel, state):
-        baseAddress = O22SIOUT.BASE_HDDPOINT_WRITE_OFF if state == 0 else O22SIOUT.BASE_HDDPOINT_WRITE_ON
-        point = 4 if channel < 32 else 0
-        nResult = self.WriteBlock(baseAddress + point + (O22SIOUT.SIZE_HDDPOINT * module), (1 << (channel % 32)))
+        destinationOffset = O22SIOUT.BASE_HDDPOINT_WRITE + (module * 0x1000) + (channel * O22SIOUT.SIZE_HDDPOINT)
+        nResult = self.WriteBlock(destinationOffset, state)
         return nResult
 
     def GetHDDigitalPointState(self, module, channel):
-        point = 4 if channel < 32 else 0
-        nResult = self.ReadBlock(O22SIOUT.BASE_HDDPOINT_READ + point + (O22SIOUT.SIZE_HDDPOINT * module))
+        destinationOffset = O22SIOUT.BASE_HDDPOINT_READ + (module * 0x1000) + (channel * O22SIOUT.SIZE_HDDPOINT)
+        nResult = self.ReadBlock(destinationOffset)
         return nResult
 
     def WriteBlock(self, address, value):
@@ -43,13 +42,11 @@ class O22MMP:
     def BuildWriteBlockRequest(self, dest, value):
         tcode = O22SIOUT.TCODE_WRITE_BLOCK_REQUEST
         block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,4, 0,0, 0,0,0,value]
-        print block
         return bytearray(block)
 
     def BuildReadBlockRequest(self, dest):
         tcode = O22SIOUT.TCODE_READ_BLOCK_REQUEST
         block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,4, 0,0]
-        print block
         return bytearray(block)
 
     def UnpackWriteResponse(self, data):
