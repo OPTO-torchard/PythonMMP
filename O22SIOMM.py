@@ -52,9 +52,9 @@ class O22MMP:
 
     def SetAnalogPointValue(self, module, channel, value):
         destinationOffset = O22SIOUT.BASE_APOINT_WRITE + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
-        hexvalue = hex(struct.unpack('>Q', struct.pack('>d', value))[0])
+        hexvalue = hex(struct.unpack('L', struct.pack('<f', value))[0])
         hexval = []
-        for i in range(8):
+        for i in range(4):
             hexval.append(int(str(hexvalue)[(2*i)+2:(2*i)+4], 16))
         print hexval
         data = self.WriteBlock(destinationOffset, hexval) 
