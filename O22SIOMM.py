@@ -1,5 +1,6 @@
 import O22SIOUT
 import sys
+import array
 import struct
 import socket
 
@@ -11,6 +12,24 @@ class O22MMP:
         self.tlabel = 0 # transaction label is unused.
 
 
+## MISC MMP ACCESS FUNCTIONS
+##
+    def UnitDescription(self):
+        #return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_FIRMWARE_VERSION), 'c')
+        destinationOffset = O22SIOUT.BASE_UNIT_DESCRIPTION
+        data = self.ReadBlock(destinationOffset)
+        return self.UnpackReadResponse(data, '$')
+
+    def FirmwareVersion(self):
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_FIRMWARE_VERSION), '$')
+        #destinationOffset = O22SIOUT.BASE_UNIT_DESCRIPTION
+        #data = self.ReadBlock(destinationOffset)
+        #return self.UnpackReadResponse(data, '$')
+
+    def MACAddress(self):
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS), '$')
+ 
+
 ## HD DIGITAL POINTS
 ##
     def GetHDDigitalPointState(self, module, channel):
@@ -20,7 +39,7 @@ class O22MMP:
 
     def SetHDDigitalPointState(self, module, channel, state):
         destinationOffset = O22SIOUT.BASE_HDDPOINT_WRITE + (module * O22SIOUT.OFFSET_HDDPOINT_MOD) + (channel * O22SIOUT.OFFSET_HDDPOINT)
-        data = self.WriteBlock(destinationOffset, state)
+        data = self.WriteBlock(destinationOffset, [0,0,0,state])
         return self.UnpackWriteResponse(data)
 
 
@@ -32,8 +51,13 @@ class O22MMP:
         return self.UnpackReadResponse(data, 'f')
 
     def SetAnalogPointValue(self, module, channel, value):
-        destinationOffset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
-        data = self.WriteBlock(destinationOffset, value)
+        destinationOffset = O22SIOUT.BASE_APOINT_WRITE + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
+        hexvalue = hex(struct.unpack('>Q', struct.pack('>d', value))[0])
+        hexval = []
+        for i in range(8):
+            hexval.append(int(str(hexvalue)[(2*i)+2:(2*i)+4], 16))
+        print hexval
+        data = self.WriteBlock(destinationOffset, hexval) 
         return self.UnpackWriteResponse(data)
 
 
@@ -57,9 +81,11 @@ class O22MMP:
         block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,16, 0,0]
         return bytearray(block)
 
-    def BuildWriteBlockRequest(self, dest, value):
+    def BuildWriteBlockRequest(self, dest, data):
         tcode = O22SIOUT.TCODE_WRITE_BLOCK_REQUEST
-        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,4, 0,0, 0,0,0,value]
+        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,4, 0,0]
+        block = block + data
+        print block
         return bytearray(block)
 
 
@@ -68,9 +94,16 @@ class O22MMP:
 ##
     def UnpackReadResponse(self, data, data_type):
         data_block = data[16:]
-        #print str(len(data))
+        output = ''
+        #prin str(len(data))
         #print str(len(data_block))
-        output = struct.unpack_from('>'+data_type, bytearray(data_block))
+        if(data_type == '$'):
+            for i in range(len(data_block)):
+                nextChar = str(struct.unpack_from('>c', bytearray(data_block[i])))[2:-2]
+                #print nextChar
+                output += nextChar
+        else: output = struct.unpack_from(''+data_type, bytearray(data_block))
+        #output = struct.unpack_from('>'+data_type, bytearray(data_block))
         return str(output)[1:-2]
 
     def UnpackWriteResponse(self, data):
