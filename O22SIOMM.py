@@ -16,14 +16,17 @@ class O22MMP:
     def ReadRawOffset(self, offset, size, data_type):
         return self.UnpackReadResponse(self.ReadBlock(int(offset, 16), size), data_type)
 
+    def LastError(self):
+        return str(hex(int(self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_LAST_ERROR, 4), 'i')))).upper()[2:]
+
     def IPAddress(self):
         return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS, 4), 'IP')
 
     def UnitDescription(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_UNIT_DESCRIPTION, 12), 'none')
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_UNIT_DESCRIPTION, 12), 'NONE')
 
     def FirmwareVersion(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_FIRMWARE_VERSION, 4), '$')
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_FIRMWARE_VERSION, 4), 'FIRMWARE')
 
     def MACAddress(self):
         return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS, 6), 'MAC')
@@ -44,10 +47,17 @@ class O22MMP:
 
 ## ANALOG POINTS
 ##
+    def GetAnalogPointMin(self, module, channel):
+        destinationOffset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + 8
+        return self.UnpackReadResponse(self.ReadBlock(destinationOffset, 4), 'f')
+
+    def GetAnalogPointMax(self, module, channel):
+        destinationOffset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + 12
+        return self.UnpackReadResponse(self.ReadBlock(destinationOffset, 4), 'f')
+
     def GetAnalogPointValue(self, module, channel):
         destinationOffset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
-        data = self.ReadBlock(destinationOffset, 4)
-        return self.UnpackReadResponse(data, 'f')
+        return self.UnpackReadResponse(self.ReadBlock(destinationOffset, 4), 'f')
 
     def SetAnalogPointValue(self, module, channel, value):
         destinationOffset = O22SIOUT.BASE_APOINT_WRITE + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
@@ -57,8 +67,7 @@ class O22MMP:
             for i in range(4):
                 hexvals.append(int(str(valueToWrite)[(2*i)+2:(2*i)+4], 16))
         else: hexvals = [0, 0, 0, 0]
-        data = self.WriteBlock(destinationOffset, hexvals)
-        return self.UnpackWriteResponse(data)
+        return self.UnpackWriteResponse(self.WriteBlock(destinationOffset, hexvals))
 
 
 ## MEMORY ACCESS FUNCTIONS
@@ -94,11 +103,19 @@ class O22MMP:
         data_block = data[16:]
         output = ''
 
-        if data_type == '$': # experimental data unpack / format loop
-            for i in range(len(data_block)):
-                nextChar = str(struct.unpack_from('>c', bytearray(data_block[i])))#[1:-2]
-#                print nextChar
-                output += nextChar
+        if data_type == 'FIRMWARE': # experimental data unpack / format loop
+            version = []
+            for i in range(4):
+                nextChar = str(struct.unpack_from('>c', bytearray(data_block[i])))[4:-3]
+                version.append(nextChar)
+            # determine release type "N" = A, B, S, or R
+            if int(version[2]) == 0:    output = 'A'
+            elif int(version[2]) == 1:  output = 'B'
+            elif int(version[2]) == 2:  output = 'R'
+            elif int(version[2]) == 3:  output = 'S'
+            else:                       output = '?'
+            # version comes in [V, v, N, c] format, output like "NV.vc" 
+            output += str(int(version[0])) + '.' + str(int(version[1])) + chr(int(version[3])+97)
 
         elif data_type == 'IP': # unpack data and format as an IP address
             for i in range(len(data_block)): # trim first 3 and last 3 around <data>: ('/<data>',)
@@ -115,7 +132,7 @@ class O22MMP:
                 output += nextChar[2:] + '-' # trim 0x, and dash
             output = output[:-1].upper() # trim out trailing dash, force upper case
         
-        elif data_type == 'none': # unpack data that has no formatting
+        elif data_type == 'NONE': # unpack data that has no formatting
             output = data_block
         else: # unpack data of a specific given data_type (c, i, f, l, q, etc...)
             output = str(struct.unpack_from('>'+data_type, bytearray(data_block)))[1:-2]
