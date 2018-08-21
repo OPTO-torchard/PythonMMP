@@ -10,33 +10,40 @@ data_type = 'c'
 value = float(sys.argv[1]) if(len(sys.argv) > 1) else 0
 
 grvEpic = O22SIOMM.O22MMP()
-print 'Terry,  initial = ' + str(grvEpic.GetAnalogPointValue(1,0))
-print 'success if zero   ' + str(grvEpic.SetAnalogPointValue(1, 0, value))
-print 'Terry,   after =  ' + str(grvEpic.GetAnalogPointValue(1,0))
-print ''
-print 'Terry, MAC addr: ' + str(grvEpic.MACAddress())
-print 'Terry, IP addr.: ' + str(grvEpic.IPAddress())
-print 'Terry, firmware: ' + str(grvEpic.FirmwareVersion())
-print 'Terry, unit des: ' + str(grvEpic.UnitDescription())
-print 'Terry,    error: ' + str(grvEpic.LastError())
-print 'Terry, mod0 ch5= ' + str(grvEpic.GetAnalogPointValue(2, 0))
-print 'Terry, min val = ' + str(grvEpic.GetAnalogPointMin(2, 0))
-print 'Terry, max val = ' + str(grvEpic.GetAnalogPointMax(2, 0))
-#print 'Raw read:\t' + str(grvEpic.ReadRawOffset(offset, size, data_type)) + '\n'
+print '\nTerry`s groov EPIC:'
+print 'writing ' + str(value) + ' to analog at mod1 ch0 . . .'
+print 'initial value  = ' + str(grvEpic.GetAnalogPointValue(1,0))
+print 'write success -> ' + str(grvEpic.SetAnalogPointValue(1, 0, value))
+print 'updated value  = ' + str(grvEpic.GetAnalogPointValue(1,0))
+print 'ETH 0 MAC addr.: ' + str(grvEpic.MACAddressE0())
+print 'ETH 0 IP addr. : ' + str(grvEpic.IPAddressE0())
+print 'ETH 1 MAC addr.: ' + str(grvEpic.MACAddressE1())
+print 'ETH 1 IP addr. : ' + str(grvEpic.IPAddressE1())
+print 'FirmwareVersion: ' + str(grvEpic.FirmwareVersion())
+print 'UnitDescription: ' + str(grvEpic.UnitDescription())
+print 'LastError      : ' + str(grvEpic.LastError())
+print 'digPt  mod0 ch5= ' + str(grvEpic.GetHDDigitalPointState(0, 5))
+print 'analog mod2 ch0= ' + str(grvEpic.GetAnalogPointValue(2, 0))
+print 'analog min val = ' + str(grvEpic.GetAnalogPointMin(2, 0))
+print 'analog max val = ' + str(grvEpic.GetAnalogPointMax(2, 0))
+#print 'Raw read result: ' + str(grvEpic.ReadRawOffset(offset, size, data_type)) + '\n'
 grvEpic.close()
 
 benEpic = O22SIOMM.O22MMP('10.192.0.152')
-print ''
-print 'Ben, MAC addr. : ' + str(benEpic.MACAddress())
-print 'Ben, IP address: ' + str(benEpic.IPAddress())
-print 'Ben, firmware v: ' + str(benEpic.FirmwareVersion())
-print 'Ben, unit descr: ' + str(benEpic.UnitDescription())
-print 'Ben, last error: ' + str(benEpic.LastError())
-print 'Ben, 2:0 val =   ' + str(benEpic.GetAnalogPointValue(2, 0))
-print 'Ben, min val =   ' + str(benEpic.GetAnalogPointMin(2, 0))
-print 'Ben, max val =   ' + str(benEpic.GetAnalogPointMax(2, 0))
-#print 'Raw read:\t' + str(benEpic.ReadRawOffset(offset, size, data_type)) + '\n'
+print '\nBen`s groov EPIC:'
+print 'ETH 0 MAC addr.: ' + str(benEpic.MACAddressE0())
+print 'ETH 0 IP addr. : ' + str(benEpic.IPAddressE0())
+print 'ETH 1 MAC addr.: ' + str(benEpic.MACAddressE1())
+print 'ETH 1 IP addr. : ' + str(benEpic.IPAddressE1())
+print 'FirmwareVersion: ' + str(benEpic.FirmwareVersion())
+print 'UnitDescription: ' + str(benEpic.UnitDescription())
+print 'LastError      : ' + str(benEpic.LastError())
+print 'digPt  mod0 ch5= ' + str(benEpic.GetHDDigitalPointState(0, 5))
+print 'analog mod2 ch0= ' + str(benEpic.GetAnalogPointValue(2, 0))
+print 'analog min val = ' + str(benEpic.GetAnalogPointMin(2, 0))
+print 'analog max val = ' + str(benEpic.GetAnalogPointMax(2, 0))
+#print 'Raw read result: ' + str(benEpic.ReadRawOffset(offset, size, data_type)) + '\n'
 benEpic.close()
 
 end = timer()
-print 'time = ' + str(end-start)
+print '\ntime elapsed = ' + str(end-start) + 's\n'

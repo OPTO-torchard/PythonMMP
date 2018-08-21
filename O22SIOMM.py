@@ -19,8 +19,15 @@ class O22MMP:
     def LastError(self):
         return str(hex(int(self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_LAST_ERROR, 4), 'i')))).upper()[2:]
 
-    def IPAddress(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS, 4), 'IP')
+    def IPAddressE0(self):
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS_ETH0, 4), 'IP')
+    def MACAddressE0(self):
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS_ETH0, 6), 'MAC')
+
+    def IPAddressE1(self):
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS_ETH1, 4), 'IP')
+    def MACAddressE1(self):
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS_ETH1, 6), 'MAC')
 
     def UnitDescription(self):
         return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_UNIT_DESCRIPTION, 12), 'NONE')
@@ -28,9 +35,7 @@ class O22MMP:
     def FirmwareVersion(self):
         return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_FIRMWARE_VERSION, 4), 'FIRMWARE')
 
-    def MACAddress(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS, 6), 'MAC')
- 
+
 
 ## HD DIGITAL POINTS
 ##
