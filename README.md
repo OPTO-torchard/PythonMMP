@@ -9,7 +9,7 @@ Opto Memory-Mapped Protocol module for Python
 
 	* **O22MMP()** - Default to `localhost` / `127.0.0.1`
 
-* **ReadRawOffset(offset, size, data_type)** - Rads the raw address at <offset> collecting <size> bytes and using <data_type> formatting to unpack it.
+* **ReadRawOffset(offset, size, data_type)** - Rads the raw address at `offset` collecting `size` bytes and using `data_type` formatting to unpack it.
 
 * **LastError()** - Returns the last error to cause a not acknowledged (NAK) response code.
 
@@ -26,23 +26,23 @@ Opto Memory-Mapped Protocol module for Python
 * **FirmwareVersion()** - Returns the device firmware version. For example, 'R1.1a'
 
 
-* **SetHDDigitalPointState(module, channel, state)** - The HD digital output at <channel> on <module> will be toggled to <state>, which should be either 1 or 0. Returns status code.
+* **SetHDDigitalPointState(module, channel, state)** - The HD digital output at `channel` on `module` will be toggled to `state`, which should be either 1 or 0. Returns status code.
 
-* **GetHDDigitalPointState(module, channel)** - The state of the HD digital output at <channel> on <module> will be fetched. Returns state either 1 or 0.
-
-
-* **GetAnalogPointMin(module, channel)** - Return the minimum float value of the analog I/O installed at <channel> on <module>.
-
-* **GetAnalogPointMax(module, channel)** - Return the maximum float value of the analog I/O installed at <channel> on <module>.
-
-* **GetAnalogPointValue(module, channel)** - Return the current float value of the analog I/O installed at <channel> on <module>.
-
-* **SetAnalogPointValue(module, channel, value)** - Set the analog I/O installed at <channel> on <module> to be <value>. <value> should be a float.
+* **GetHDDigitalPointState(module, channel)** - The state of the HD digital output at `channel` on `module` will be fetched. Returns state either 1 or 0.
 
 
-* **WriteBlock(address, value)** - Write <value> into memory location <address>. Relies on `BuildWriteBlockRequest()`, wraps up `.send()` and `.recv()` methods. Returns int status.
+* **GetAnalogPointMin(module, channel)** - Return the minimum float value of the analog I/O installed at `channel` on `module`.
 
-* **ReadBlock(address)** - Read value at memory location <address>. Relies on `BuidReadBlockRequest()`, wraps up `.send()` and `.recv()` methods. Returns unpacked string data.
+* **GetAnalogPointMax(module, channel)** - Return the maximum float value of the analog I/O installed at `channel` on `module`.
+
+* **GetAnalogPointValue(module, channel)** - Return the current float value of the analog I/O installed at `channel` on `module`.
+
+* **SetAnalogPointValue(module, channel, value)** - Set the analog I/O installed at `channel` on `module` to be `value`. `value` should be a float.
+
+
+* **WriteBlock(address, value)** - Write `value` into memory location `address`. Relies on `BuildWriteBlockRequest()`, wraps up `.send()` and `.recv()` methods. Returns int status.
+
+* **ReadBlock(address)** - Read value at memory location `address`. Relies on `BuidReadBlockRequest()`, wraps up `.send()` and `.recv()` methods. Returns unpacked string data.
 
 
 * **BuildWriteBlockRequest(dest, value)** - Build the write block request bytearray. Returns bytearray block.<br>
