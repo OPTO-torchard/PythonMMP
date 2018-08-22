@@ -37,54 +37,84 @@ class O22MMP:
 ## HD DIGITAL POINTS
 ##
     def GetDigitalPointState(self, module, channel):
-        destinationOffset = O22SIOUT.BASE_DPOINT_READ + (module * O22SIOUT.OFFSET_DPOINT_MOD) + (channel * O22SIOUT.OFFSET_DPOINT)
-        data = self.ReadBlock(destinationOffset, 4)
+        offset = O22SIOUT.BASE_DPOINT_READ + (module * O22SIOUT.OFFSET_DPOINT_MOD) + (channel * O22SIOUT.OFFSET_DPOINT)
+        data = self.ReadBlock(offset, 4)
         return self.UnpackReadResponse(data, 'i')
 
     def SetDigitalPointState(self, module, channel, state):
-        destinationOffset = O22SIOUT.BASE_DPOINT_WRITE + (module * O22SIOUT.OFFSET_DPOINT_MOD) + (channel * O22SIOUT.OFFSET_DPOINT)
-        data = self.WriteBlock(destinationOffset, [0,0,0,state])
+        offset = O22SIOUT.BASE_DPOINT_WRITE + (module * O22SIOUT.OFFSET_DPOINT_MOD) + (channel * O22SIOUT.OFFSET_DPOINT)
+        data = self.WriteBlock(offset, [0,0,0,state])
         return self.UnpackWriteResponse(data)
 
 
 ## ANALOG POINTS
 ##
     def GetAnalogPointValue(self, module, channel):
-        destinationOffset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
-        return self.UnpackReadResponse(self.ReadBlock(destinationOffset, 4), 'f')
+        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
+        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
 
     def SetAnalogPointValue(self, module, channel, value):
-        destinationOffset = O22SIOUT.BASE_APOINT_WRITE + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
-        valueToWrite = hex(struct.unpack('L', struct.pack('<f', value))[0])
+        offset = O22SIOUT.BASE_APOINT_WRITE + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
+        valueToWrite = hex(struct.unpack('L', struct.pack('f', value))[0])
         hexvals = []
         if(value != 0):
             for i in range(4):
                 hexvals.append(int(str(valueToWrite)[(2*i)+2:(2*i)+4], 16))
         else: hexvals = [0, 0, 0, 0]
-        return self.UnpackWriteResponse(self.WriteBlock(destinationOffset, hexvals))
+        return self.UnpackWriteResponse(self.WriteBlock(offset, hexvals))
+
 ## MIN / MAX VALUES
     def GetAnalogPointMin(self, module, channel):
-        destinationOffset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + 8
-        return self.UnpackReadResponse(self.ReadBlock(destinationOffset, 4), 'f')
+        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + 8
+        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
 
     def GetAnalogPointMax(self, module, channel):
-        destinationOffset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + 12
-        return self.UnpackReadResponse(self.ReadBlock(destinationOffset, 4), 'f')
+        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + 12
+        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
 
 ## SCRATCHPAD ACCESS FUNCTIONS
 ##
-    def GetScratchPadStringArea(self, index):
-        if (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) < O22SIOUT.MAX_BYTES_SCRATCHPAD_STRING:
-            destinationOffset = O22SIOUT.BASE_SCRATCHPAD_STRING + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING)
-            data = self.ReadRawOffset(destinationOffset, 1, 'c')[1:-1]
-            print data
-            size = ord(data) if len(data)==1 else int('0'+data[1:], 16)
-            print size
-            data = self.UnpackReadResponse(self.ReadBlock(destinationOffset+0x02, size), 'NONE')
-            return data
-        else:
+## SCRATCHPAD INT ACCESS
+    def GetScratchPadIntegerArea(self, index):
+        if (index < 0 or index > O22SIOUT.MAX_ELEMENTS_INTEGER):
             return 'index out of bounds'
-        
+        offset = O22SIOUT.BASE_SCRATCHPAD_INTEGER + (index * 4)
+        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'i')
+    
+    def SetScratchPadIntegerArea(self, index, value):
+        if (index < 0 or index > O22SIOUT.MAX_ELEMENTS_INTEGER):
+            return 'index out of bounds'
+        offset = O22SIOUT.BASE_SCRATCHPAD_INTEGER + (index * 4)
+        if(value < 256):
+            hexvals = [0, 0, 0, value]
+        else:
+            hexvals = [0, 0, 0, 0]
+            value = hex(value)
+            value = str(value)[2:] if(len(str(value)) % 2 == 0) else ('0'+str(value)[2:])
+            for i in range(len(value)/2):
+                hexvals[i+(4-len(value)/2)] = int(str(value)[(2*i):(2*i)+2], 16)
+        return self.UnpackWriteResponse(self.WriteBlock(offset, hexvals))
+
+## SCRATCHPAD STRING ACCESS
+    def GetScratchPadStringArea(self, index):
+        if (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) >= O22SIOUT.MAX_BYTES_STRING or index < 0:
+            return 'index out of bounds'
+        offset = O22SIOUT.BASE_SCRATCHPAD_STRING + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING)
+        data = self.UnpackReadResponse(self.ReadBlock(offset+0x01, 1), 'c')[1:-1]
+        size = ord(data) if len(data)==1 else int('0'+data[1:], 16)
+        data = self.UnpackReadResponse(self.ReadBlock(offset+0x02, size), 'NONE')
+        return data
+
+    def SetScratchPadStringArea(self, index, data):
+        if (len(data) > 127): return 'string must be < 128 characters'
+        if (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) < O22SIOUT.MAX_BYTES_STRING:
+            offset = O22SIOUT.BASE_SCRATCHPAD_STRING + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING)
+            hexvals = []
+            for i in range(len(data)):
+                hexvals.append(ord(data[i]))
+            return self.UnpackWriteResponse(self.WriteBlock(offset+0x02, hexvals))
+        else: return 'index out of bounds'
+
 
 ## MEMORY ACCESS FUNCTIONS
 ##
@@ -108,7 +138,7 @@ class O22MMP:
 
     def BuildWriteBlockRequest(self, dest, data):
         tcode = O22SIOUT.TCODE_WRITE_BLOCK_REQUEST
-        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,4, 0,0]
+        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,len(data), 0,0]
         block = block + data
         return bytearray(block)
 
