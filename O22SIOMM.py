@@ -56,11 +56,7 @@ class O22MMP:
     def SetAnalogPointValue(self, module, channel, value):
         offset = O22SIOUT.BASE_APOINT_WRITE + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
         valueToWrite = hex(struct.unpack('L', struct.pack('f', value))[0])
-        hexvals = []
-        if(value != 0):
-            for i in range(4):
-                hexvals.append(int(str(valueToWrite)[(2*i)+2:(2*i)+4], 16))
-        else: hexvals = [0, 0, 0, 0]
+        hexvals = self.PackFloat(value)
         return self.UnpackWriteResponse(self.WriteBlock(offset, hexvals))
 
 ## MIN / MAX VALUES
@@ -72,29 +68,35 @@ class O22MMP:
         offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + 12
         return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
 
+
 ## SCRATCHPAD ACCESS FUNCTIONS
 ##
 ## SCRATCHPAD INT ACCESS
     def GetScratchPadIntegerArea(self, index):
         if (index < 0 or index > O22SIOUT.MAX_ELEMENTS_INTEGER):
             return 'index out of bounds'
-        offset = O22SIOUT.BASE_SCRATCHPAD_INTEGER + (index * 4)
+        offset = O22SIOUT.BASE_SCRATCHPAD_INTEGER + (index * 0x04)
         return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'i')
-    
+    # ScratchPad integer write
     def SetScratchPadIntegerArea(self, index, value):
         if (index < 0 or index > O22SIOUT.MAX_ELEMENTS_INTEGER):
             return 'index out of bounds'
-        offset = O22SIOUT.BASE_SCRATCHPAD_INTEGER + (index * 4)
-        if(value < 256):
-            hexvals = [0, 0, 0, value]
-        else:
-            hexvals = [0, 0, 0, 0]
-            value = hex(value)
-            value = str(value)[2:] if(len(str(value)) % 2 == 0) else ('0'+str(value)[2:])
-            for i in range(len(value)/2):
-                hexvals[i+(4-len(value)/2)] = int(str(value)[(2*i):(2*i)+2], 16)
+        offset = O22SIOUT.BASE_SCRATCHPAD_INTEGER + (index * 0x04)
+        hexvals = self.PackInteger(value)
         return self.UnpackWriteResponse(self.WriteBlock(offset, hexvals))
-
+## SCRATCHPAD FLOAT ACCESS
+    def GetScratchPadFloatArea(self, index):
+        if (index > O22SIOUT.MAX_ELEMENTS_FLOAT):
+            return 'index out of bounds'
+        offset = O22SIOUT.BASE_SCRATCHPAD_FLOAT + (index * 0x04)
+        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
+    # ScratchPad float write
+    def SetScratchPadFloatArea(self, index, value):
+        if (index > O22SIOUT.MAX_ELEMENTS_FLOAT):
+            return 'index out of bounds'
+        offset = O22SIOUT.BASE_SCRATCHPAD_FLOAT + (index * 0x04)
+        hexvals = self.PackFloat(value)
+        return self.UnpackWriteResponse(self.WriteBlock(offset, hexvals))
 ## SCRATCHPAD STRING ACCESS
     def GetScratchPadStringArea(self, index):
         if (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) >= O22SIOUT.MAX_BYTES_STRING or index < 0:
@@ -104,7 +106,7 @@ class O22MMP:
         size = ord(data) if len(data)==1 else int('0'+data[1:], 16)
         data = self.UnpackReadResponse(self.ReadBlock(offset+0x02, size), 'NONE')
         return data
-
+    # ScratchPad string write
     def SetScratchPadStringArea(self, index, data):
         if (len(data) > 127): return 'string must be < 128 characters'
         if (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) < O22SIOUT.MAX_BYTES_STRING:
@@ -114,33 +116,6 @@ class O22MMP:
                 hexvals.append(ord(data[i]))
             return self.UnpackWriteResponse(self.WriteBlock(offset+0x02, hexvals))
         else: return 'index out of bounds'
-
-
-## MEMORY ACCESS FUNCTIONS
-##
-    def ReadBlock(self, address, size):
-        block = self.BuildReadBlockRequest(address, size)
-        nSent = self.sock.send(block)
-        return self.sock.recv(O22SIOUT.SIZE_READ_BLOCK_RESPONSE + size)
-
-    def WriteBlock(self, address, value):
-        block = self.BuildWriteBlockRequest(address, value)
-        nSent = self.sock.send(block)
-        return self.sock.recv(O22SIOUT.SIZE_WRITE_RESPONSE)
-
-
-## BLOCK REQUEST BYTE ARRAY CONSTRUCTORS
-##
-    def BuildReadBlockRequest(self, dest, size):
-        tcode = O22SIOUT.TCODE_READ_BLOCK_REQUEST
-        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,size, 0,0]
-        return bytearray(block)
-
-    def BuildWriteBlockRequest(self, dest, data):
-        tcode = O22SIOUT.TCODE_WRITE_BLOCK_REQUEST
-        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,len(data), 0,0]
-        block = block + data
-        return bytearray(block)
 
 
 ## UNPACK BLOCK RESPONSE DATA
@@ -183,11 +158,58 @@ class O22MMP:
             output = str(struct.unpack_from('>'+data_type, bytearray(data_block)))[1:-2]
         return output
 
+
+## METHODS TO PACKAGE DATA INTO HEX ARRAYS
+##
     def UnpackWriteResponse(self, data):
         data_block = data[4:8]
         status = struct.unpack_from('>i', bytearray(data_block))
         return int(str(status)[1:-2])
 
+    def PackFloat(self, value):
+        valueToWrite = hex(struct.unpack('L', struct.pack('f', value))[0])
+        hexvals = []
+        if(value != 0):
+            for i in range(4):
+                hexvals.append(int(str(valueToWrite)[(2*i)+2:(2*i)+4], 16))
+        else: hexvals = [0, 0, 0, 0]
+        return hexvals
+
+    def PackInteger(self, value):
+        hexvals = [0, 0, 0, value]
+        if(value > 255):
+            hexvals = [0, 0, 0, 0]
+            value = hex(value)
+            value = str(value)[2:] if(len(str(value)) % 2 == 0) else ('0'+str(value)[2:])
+            for i in range(len(value)/2):
+                hexvals[i+(4-len(value)/2)] = int(str(value)[(2*i):(2*i)+2], 16)
+        return hexvals
+
+
+## MEMORY ACCESS FUNCTIONS
+##
+    def ReadBlock(self, address, size):
+        block = self.BuildReadBlockRequest(address, size)
+        nSent = self.sock.send(block)
+        return self.sock.recv(O22SIOUT.SIZE_READ_BLOCK_RESPONSE + size)
+
+    def WriteBlock(self, address, value):
+        block = self.BuildWriteBlockRequest(address, value)
+        nSent = self.sock.send(block)
+        return self.sock.recv(O22SIOUT.SIZE_WRITE_RESPONSE)
+
+## BLOCK REQUEST BYTE ARRAY CONSTRUCTORS
+##
+    def BuildReadBlockRequest(self, dest, size):
+        tcode = O22SIOUT.TCODE_READ_BLOCK_REQUEST
+        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,size, 0,0]
+        return bytearray(block)
+
+    def BuildWriteBlockRequest(self, dest, data):
+        tcode = O22SIOUT.TCODE_WRITE_BLOCK_REQUEST
+        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,len(data), 0,0]
+        block = block + data
+        return bytearray(block)
 
 ## CLOSE SOCKET / END SESSION
 ##
