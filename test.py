@@ -4,7 +4,7 @@ grvEpic = O22SIOMM.O22MMP()
 start = timer()
 
 for i in range(100):
-    grvEpic.SetHDDigitalPointState(0, 5, (i%2))
+    grvEpic.SetDigitalPointState(0, 5, (i%2))
 grvEpic.close()
 
 end = timer()
