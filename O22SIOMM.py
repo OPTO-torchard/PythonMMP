@@ -89,6 +89,7 @@ class O22MMP:
         if (index > O22SIOUT.MAX_ELEMENTS_FLOAT):
             return 'index out of bounds'
         offset = O22SIOUT.BASE_SCRATCHPAD_FLOAT + (index * 0x04)
+        print hex(offset)
         return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
     # ScratchPad float write
     def SetScratchPadFloatArea(self, index, value):
