@@ -13,10 +13,19 @@ class O22MMP:
 
 ## MISC MMP ACCESS FUNCTIONS
 ##
+# ReadRawOffset
     def ReadRawOffset(self, offset, size, data_type):
         return self.UnpackReadResponse(self.ReadBlock(int(offset, 16), size), data_type)
+# LastError
     def LastError(self):
         return str(hex(int(self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_LAST_ERROR, 4), 'i')))).upper()[2:]
+# UnitDescription
+    def UnitDescription(self):
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_UNIT_DESCRIPTION, 12), 'NONE')
+# FirmwareVersion
+    def FirmwareVersion(self):
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_FIRMWARE_VERSION, 4), 'FIRMWARE')
+
 ## Eth0 STATUS
     def IPAddressE0(self):
         return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS_ETH0, 4), 'IP')
@@ -27,111 +36,108 @@ class O22MMP:
         return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS_ETH1, 4), 'IP')
     def MACAddressE1(self):
         return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS_ETH1, 6), 'MAC')
-## UNIT STATUS
-    def UnitDescription(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_UNIT_DESCRIPTION, 12), 'NONE')
-    def FirmwareVersion(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_FIRMWARE_VERSION, 4), 'FIRMWARE')
+
 
 
 ## HD DIGITAL POINTS
 ##
     def GetDigitalPointState(self, module, channel):
         offset = O22SIOUT.BASE_DPOINT_READ + (module * O22SIOUT.OFFSET_DPOINT_MOD) + (channel * O22SIOUT.OFFSET_DPOINT)
-        data = self.ReadBlock(offset, 4)
-        return self.UnpackReadResponse(data, 'i')
-
+        return int(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'i'))
+## SetDigitalPointState
     def SetDigitalPointState(self, module, channel, state):
         offset = O22SIOUT.BASE_DPOINT_WRITE + (module * O22SIOUT.OFFSET_DPOINT_MOD) + (channel * O22SIOUT.OFFSET_DPOINT)
-        data = self.WriteBlock(offset, [0,0,0,state])
-        return self.UnpackWriteResponse(data)
+        return self.UnpackWriteResponse(self.WriteBlock(offset, [0,0,0,state]))
 
 
 ## ANALOG POINTS
 ##
+## GetAnalogPointValue
     def GetAnalogPointValue(self, module, channel):
         offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
-        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
-
+        return float(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f'))
+## SetAnalogPointValue
     def SetAnalogPointValue(self, module, channel, value):
         offset = O22SIOUT.BASE_APOINT_WRITE + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
-        valueToWrite = hex(struct.unpack('L', struct.pack('f', value))[0])
-        hexvals = self.PackFloat(value)
-        return self.UnpackWriteResponse(self.WriteBlock(offset, hexvals))
+        return self.UnpackWriteResponse(self.WriteBlock(offset, self.PackFloat(value)))
 
 ## MIN / MAX VALUES
+## GetAnalogPointMin
     def GetAnalogPointMin(self, module, channel):
-        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + 8
-        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
-
+        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + O22SIOUT.OFFSET_APOINT_MIN
+        return float(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f'))
+## GetAnalogPointMax
     def GetAnalogPointMax(self, module, channel):
-        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + 12
-        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
+        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel) + O22SIOUT.OFFSET_APOINT_MAX
+        return float(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
 
 
 ## SCRATCHPAD ACCESS FUNCTIONS
 ##
-## SCRATCHPAD INT ACCESS
+## INTEGERS
+# ScratchPad int read
     def GetScratchPadIntegerArea(self, index):
         if (index < 0 or index > O22SIOUT.MAX_ELEMENTS_INTEGER):
             return 'index out of bounds'
         offset = O22SIOUT.BASE_SCRATCHPAD_INTEGER + (index * 0x04)
-        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'i')
-    # ScratchPad integer write
+        return int(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'i'))
+# ScratchPad integer write
     def SetScratchPadIntegerArea(self, index, value):
         if (index < 0 or index > O22SIOUT.MAX_ELEMENTS_INTEGER):
             return 'index out of bounds'
         offset = O22SIOUT.BASE_SCRATCHPAD_INTEGER + (index * 0x04)
-        hexvals = self.PackInteger(value)
-        return self.UnpackWriteResponse(self.WriteBlock(offset, hexvals))
-## SCRATCHPAD FLOAT ACCESS
+        return self.UnpackWriteResponse(self.WriteBlock(offset, self.PackInteger(value)))
+## FLOATS
+# ScratchPad float read
     def GetScratchPadFloatArea(self, index):
         if (index > O22SIOUT.MAX_ELEMENTS_FLOAT):
             return 'index out of bounds'
         offset = O22SIOUT.BASE_SCRATCHPAD_FLOAT + (index * 0x04)
-        print hex(offset)
-        return self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f')
-    # ScratchPad float write
+        return float(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f'))
+# ScratchPad float write
     def SetScratchPadFloatArea(self, index, value):
         if (index > O22SIOUT.MAX_ELEMENTS_FLOAT):
             return 'index out of bounds'
         offset = O22SIOUT.BASE_SCRATCHPAD_FLOAT + (index * 0x04)
-        hexvals = self.PackFloat(value)
-        return self.UnpackWriteResponse(self.WriteBlock(offset, hexvals))
-## SCRATCHPAD STRING ACCESS
+        return self.UnpackWriteResponse(self.WriteBlock(offset, self.PackFloat(value)))
+## STRINGS
+# ScratchPad string read
     def GetScratchPadStringArea(self, index):
         if (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) >= O22SIOUT.MAX_BYTES_STRING or index < 0:
             return 'index out of bounds'
         offset = O22SIOUT.BASE_SCRATCHPAD_STRING + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING)
-        data = self.UnpackReadResponse(self.ReadBlock(offset+0x01, 1), 'c')[1:-1]
-        size = ord(data) if len(data)==1 else int('0'+data[1:], 16)
-        data = self.UnpackReadResponse(self.ReadBlock(offset+0x02, size), 'NONE')
-        return data
-    # ScratchPad string write
+        sizeData = self.UnpackReadResponse(self.ReadBlock(offset+0x01, 1), 'c')[1:-1]
+        # sizeData resolves to an ASCII character `c` *or* a hex `/x00` number. Convert to int...
+        size = ord(sizeData) if len(sizeData)==1 else int('0'+sizeData[1:], 16)
+        # NOTE string size is at offset, string data is at offset + 2 bytes
+        return self.UnpackReadResponse(self.ReadBlock(offset+0x02, size), 'NONE')
+# ScratchPad string write
     def SetScratchPadStringArea(self, index, data):
         if (len(data) > 127): return 'string must be < 128 characters'
         if (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) < O22SIOUT.MAX_BYTES_STRING:
-            offset = O22SIOUT.BASE_SCRATCHPAD_STRING + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING)
+            # NOTE string size is at offset, string data is at offset + 2 bytes
+            offset = O22SIOUT.BASE_SCRATCHPAD_STRING + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) + 0x02
             hexvals = []
             for i in range(len(data)):
                 hexvals.append(ord(data[i]))
-            return self.UnpackWriteResponse(self.WriteBlock(offset+0x02, hexvals))
+            return self.UnpackWriteResponse(self.WriteBlock(offset, hexvals))
         else: return 'index out of bounds'
 
 
 ## UNPACK BLOCK RESPONSE DATA
 ##
+## UnpackReadResponse
     def UnpackReadResponse(self, data, data_type):
         data_block = data[16:]
         output = ''
         # unpack data and build firmware version string
-        # version comes in [V, v, N, c] format, output like "NV.vc"
+        #       version comes in [V, v, N, c] HEX format, output "NV.vc" string.
+        #       Replace `N` with A, B, R, S or ?, Replace `c` with 0 = 'a', 1 = 'b', ...
         if data_type == 'FIRMWARE':
             version = []
             for i in range(4):
                 nextChar = str(struct.unpack_from('>c', bytearray(data_block[i])))[4:-3]
                 version.append(nextChar)
-            # determine release type "N" = A, B, S, or R
             if int(version[2]) == 0:    output = 'A'
             elif int(version[2]) == 1:  output = 'B'
             elif int(version[2]) == 2:  output = 'R'
@@ -140,9 +146,9 @@ class O22MMP:
             output += str(int(version[0])) + '.' + str(int(version[1])) + chr(int(version[3])+97)
         # unpack data and format as an IP address
         elif data_type == 'IP':
-            for i in range(len(data_block)): # trim first 3 and last 3 around <data>: ('/<data>',)
+            for i in range(len(data_block)): # *trim first 3 and last 3 around <data>: ('/<data>',)
                 nextChar = str(struct.unpack_from('>c', bytearray(data_block[i])))[3:-3]
-                if(nextChar == 'n'): nextChar = 10 # catch 10 = 0x0A = \n (line feed)
+                if(nextChar == 'n'): nextChar = 10 # catch:  10  =(hex)=>  0x0A  =(ascii)=>  \n  =(trim)=>  'n'
                 else: nextChar = int('0'+nextChar, 16) # convert hex to decimal
                 output += str(nextChar) + '.'
             output = output[:-1] # trim trailing .
@@ -153,20 +159,23 @@ class O22MMP:
                 if(len(nextChar) == 1): nextChar = hex(ord(nextChar)) # force valid ascii back into hex
                 output += nextChar[2:] + '-' # trim 0x, and dash
             output = output[:-1].upper() # trim out trailing dash, force upper case
-        elif data_type == 'NONE': # unpack data that has no formatting
+        # unpack data that has no formatting
+        elif data_type == 'NONE':
             output = data_block
-        else: # unpack data of a specific given data_type (c, i, f, l, q, etc...)
+        # unpack data of a specific given struct data_type (c, i, f, l, q, etc.) *convert type after calling the function*
+        else:
             output = str(struct.unpack_from('>'+data_type, bytearray(data_block)))[1:-2]
         return output
-
-
-## METHODS TO PACKAGE DATA INTO HEX ARRAYS
-##
+## UnpackWriteResponse
     def UnpackWriteResponse(self, data):
         data_block = data[4:8]
         status = struct.unpack_from('>i', bytearray(data_block))
         return int(str(status)[1:-2])
 
+
+## METHODS TO PACKAGE DATA INTO HEX ARRAYS
+##
+## PackFloat
     def PackFloat(self, value):
         valueToWrite = hex(struct.unpack('L', struct.pack('f', value))[0])
         hexvals = []
@@ -175,7 +184,7 @@ class O22MMP:
                 hexvals.append(int(str(valueToWrite)[(2*i)+2:(2*i)+4], 16))
         else: hexvals = [0, 0, 0, 0]
         return hexvals
-
+## PackInteger
     def PackInteger(self, value):
         hexvals = [0, 0, 0, value]
         if(value > 255):
@@ -187,13 +196,14 @@ class O22MMP:
         return hexvals
 
 
-## MEMORY ACCESS FUNCTIONS
+## CORE MEMORY ACCESS FUNCTIONS
 ##
+## ReadBlock
     def ReadBlock(self, address, size):
         block = self.BuildReadBlockRequest(address, size)
         nSent = self.sock.send(block)
         return self.sock.recv(O22SIOUT.SIZE_READ_BLOCK_RESPONSE + size)
-
+## WriteBlock
     def WriteBlock(self, address, value):
         block = self.BuildWriteBlockRequest(address, value)
         nSent = self.sock.send(block)
@@ -201,18 +211,21 @@ class O22MMP:
 
 ## BLOCK REQUEST BYTE ARRAY CONSTRUCTORS
 ##
+## BuildReadBlockRequest
     def BuildReadBlockRequest(self, dest, size):
         tcode = O22SIOUT.TCODE_READ_BLOCK_REQUEST
-        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,size, 0,0]
+        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255]
+        block += [int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,size, 0,0]
         return bytearray(block)
-
+## BuildWriteBlockRequest
     def BuildWriteBlockRequest(self, dest, data):
         tcode = O22SIOUT.TCODE_WRITE_BLOCK_REQUEST
-        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255, int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,len(data), 0,0]
-        block = block + data
-        return bytearray(block)
+        block = [0, 0, (self.tlabel << 2), (tcode << 4), 0, 0, 255, 255]
+        block += [int(str(hex(dest))[2:4],16), int(str(hex(dest))[4:6],16), int(str(hex(dest))[6:8],16), int(str(hex(dest))[8:10],16), 0,len(data), 0,0]
+        return bytearray(block+data)
 
 ## CLOSE SOCKET / END SESSION
-##
     def close(self):
         self.sock.close()
+
+# written by: Terry Orchard
