@@ -20,9 +20,9 @@ print 'ScratchPad string old value:\t' + grvEpic.GetScratchPadStringArea(index)
 print 'Writing "' + data + '" to ScratchPad string area #' + str(index) + ' ->' + str(grvEpic.SetScratchPadStringArea(index, data))
 print 'ScratchPad string new value:\t' + grvEpic.GetScratchPadStringArea(index)
 print ''
-print 'ScratchPad integer at index 0:\t' + grvEpic.GetScratchPadIntegerArea(0)
+print 'ScratchPad integer at index 0:\t' + str(grvEpic.GetScratchPadIntegerArea(0))
 print 'Writing `' + str(integer) + '` to ScratchPad integer #0 ->' + str(grvEpic.SetScratchPadIntegerArea(0, integer))
-print 'ScratchPad integer at index 0:\t' + grvEpic.GetScratchPadIntegerArea(0) + '\n'
+print 'ScratchPad integer at index 0:\t' + str(grvEpic.GetScratchPadIntegerArea(0)) + '\n'
 
 print 'ETH 0 MAC addr.: ' + str(grvEpic.MACAddressE0())
 print 'ETH 0 IP addr. : ' + str(grvEpic.IPAddressE0())

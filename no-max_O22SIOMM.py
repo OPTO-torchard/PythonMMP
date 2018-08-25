@@ -18,16 +18,13 @@ class O22MMP:
         return self.UnpackReadResponse(self.ReadBlock(int(offset, 16), size), data_type)
 # LastError
     def LastError(self):
-        data = self.ReadBlock(O22SIOUT.BASE_LAST_ERROR, 4)
-        return str(hex(int(self.UnpackReadResponse(data, 'i')))).upper()[2:]
+        return str(hex(int(self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_LAST_ERROR, 4), 'i')))).upper()[2:]
 # UnitDescription
     def UnitDescription(self):
-        data = O22SIOUT.BASE_UNIT_DESCRIPTION, 12)
-        return self.UnpackReadResponse(self.ReadBlock(data, 'NONE')
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_UNIT_DESCRIPTION, 12), 'NONE')
 # FirmwareVersion
     def FirmwareVersion(self):
-        data = O22SIOUT.BASE_FIRMWARE_VERSION, 4)
-        return self.UnpackReadResponse(self.ReadBlock(data, 'FIRMWARE')
+        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_FIRMWARE_VERSION, 4), 'FIRMWARE')
 
 ## Eth0 STATUS
     def IPAddressE0(self):
