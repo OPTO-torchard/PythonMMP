@@ -151,13 +151,13 @@ class O22MMP:
         if (len(value) > 127): return 'string must be < 128 characters'
         loc = index * O22SIOUT.OFFSET_SCRATCHPAD_STRING
         if loc < O22SIOUT.MAX_BYTES_STRING:
-            offset = O22SIOUT.BASE_SCRATCHPAD_STRING
-                    + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) + 0x02
+            offset = (O22SIOUT.BASE_SCRATCHPAD_STRING
+                    + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING) + 0x02)
             hexvals = []
             for i in range(len(value)):
                 hexvals.append(ord(value[i]))
             data = self.WriteBlock(offset, hexvals)
-            return self.UnpackWriteResponse()
+            return self.UnpackWriteResponse(data)
         else: return 'index out of bounds'
 
 
@@ -182,8 +182,8 @@ class O22MMP:
             elif int(version[2]) == 3:  output = 'S'
             else:                       output = '?'
             # Replace `c` with 0 = 'a', 1 = 'b', ... using chr(..+97)
-            output += str(int(version[0])) + '.'
-                    + str(int(version[1])) + chr(int(version[3])+97)
+            output += (str(int(version[0])) + '.'
+                    + str(int(version[1])) + chr(int(version[3])+97))
         # unpack data and format as an IP address
         elif data_type == 'IP':
             for i in range(len(data_block)):
