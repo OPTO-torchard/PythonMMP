@@ -53,8 +53,8 @@ class O22MMP:
         offset = (O22SIOUT.BASE_DPOINT_READ
                 + (module * O22SIOUT.OFFSET_DPOINT_MOD)
                 + (channel * O22SIOUT.OFFSET_DPOINT))
-        data = self.ReadBlock(offset, 4), 'i')
-        return int(self.UnpackReadResponse(data)
+        data = self.ReadBlock(offset, 4)
+        return int(self.UnpackReadResponse(data), 'i')
 ## SetDigitalPointState
     def SetDigitalPointState(self, module, channel, state):
         offset = (O22SIOUT.BASE_DPOINT_WRITE
@@ -71,8 +71,8 @@ class O22MMP:
         offset = (O22SIOUT.BASE_APOINT_READ
                 + (O22SIOUT.OFFSET_APOINT_MOD * module)
                 + (O22SIOUT.OFFSET_APOINT * channel))
-        data = self.ReadBlock(offset, 4), 'f')
-        return float(self.UnpackReadResponse(data)
+        data = self.ReadBlock(offset, 4)
+        return float(self.UnpackReadResponse(data), 'f')
 ## SetAnalogPointValue
     def SetAnalogPointValue(self, module, channel, value):
         offset = (O22SIOUT.BASE_APOINT_WRITE
