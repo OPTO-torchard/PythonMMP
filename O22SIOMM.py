@@ -137,13 +137,13 @@ class O22MMP:
         loc = index * O22SIOUT.OFFSET_SCRATCHPAD_STRING
         if (loc >= O22SIOUT.MAX_BYTES_STRING) or (index < 0):
             return 'index out of bounds'
-        offset = O22SIOUT.BASE_SCRATCHPAD_STRING
-                + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING)
-        sizeData = 
+        offset = (O22SIOUT.BASE_SCRATCHPAD_STRING
+                + (index * O22SIOUT.OFFSET_SCRATCHPAD_STRING))
+        sizeData = self.ReadBlock(offset+0x01, 1)
         rawSize = self.UnpackReadResponse(sizeData, 'c')[1:-1]
         # rawSize is char `c` *or* a hex `/x00` number. Convert to int:
         size = ord(rawSize) if len(rawSize)==1 else int('0'+rawSize[1:], 16)
-        # Note: string size is at offset, string data is at offset + 2
+        # Note: string size is at offset + 1, string data is at offset + 2
         data = self.ReadBlock(offset+0x02, size)
         return self.UnpackReadResponse(data, 'NONE')
 # ScratchPad string write
