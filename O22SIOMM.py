@@ -50,16 +50,16 @@ class O22MMP:
 ## HD DIGITAL POINTS
 ##
     def GetDigitalPointState(self, module, channel):
-        offset = O22SIOUT.BASE_DPOINT_READ +
-                 (module * O22SIOUT.OFFSET_DPOINT_MOD) +
-                 (channel * O22SIOUT.OFFSET_DPOINT)
+        offset = O22SIOUT.BASE_DPOINT_READ
+                + (module * O22SIOUT.OFFSET_DPOINT_MOD)
+                + (channel * O22SIOUT.OFFSET_DPOINT)
         data = self.ReadBlock(offset, 4), 'i')
         return int(self.UnpackReadResponse(data)
 ## SetDigitalPointState
     def SetDigitalPointState(self, module, channel, state):
-        offset = O22SIOUT.BASE_DPOINT_WRITE +
-                 (module * O22SIOUT.OFFSET_DPOINT_MOD) +
-                 (channel * O22SIOUT.OFFSET_DPOINT)
+        offset = O22SIOUT.BASE_DPOINT_WRITE
+                + (module * O22SIOUT.OFFSET_DPOINT_MOD)
+                + (channel * O22SIOUT.OFFSET_DPOINT)
         self.WriteBlock(offset, [0,0,0,state])
         return self.UnpackWriteResponse(data)
 
@@ -68,33 +68,33 @@ class O22MMP:
 ##
 ## GetAnalogPointValue
     def GetAnalogPointValue(self, module, channel):
-        offset = O22SIOUT.BASE_APOINT_READ +
-                 (O22SIOUT.OFFSET_APOINT_MOD * module) +
-                 (O22SIOUT.OFFSET_APOINT * channel)
+        offset = O22SIOUT.BASE_APOINT_READ
+                + (O22SIOUT.OFFSET_APOINT_MOD * module)
+                + (O22SIOUT.OFFSET_APOINT * channel)
         data = self.ReadBlock(offset, 4), 'f')
         return float(self.UnpackReadResponse(data)
 ## SetAnalogPointValue
     def SetAnalogPointValue(self, module, channel, value):
-        offset = O22SIOUT.BASE_APOINT_WRITE +
-                 (O22SIOUT.OFFSET_APOINT_MOD * module) +
-                 (O22SIOUT.OFFSET_APOINT * channel)
+        offset = O22SIOUT.BASE_APOINT_WRITE
+                + (O22SIOUT.OFFSET_APOINT_MOD * module)
+                + (O22SIOUT.OFFSET_APOINT * channel)
         data = self.WriteBlock(offset, self.PackFloat(value))
         return self.UnpackWriteResponse(data)
 ## MIN / MAX VALUES
 ## GetAnalogPointMin
     def GetAnalogPointMin(self, module, channel):
-        offset = O22SIOUT.BASE_APOINT_READ +
-                 (O22SIOUT.OFFSET_APOINT_MOD * module) +
-                 (O22SIOUT.OFFSET_APOINT * channel) +
-                 O22SIOUT.OFFSET_APOINT_MIN
+        offset = O22SIOUT.BASE_APOINT_READ
+                + (O22SIOUT.OFFSET_APOINT_MOD * module)
+                + (O22SIOUT.OFFSET_APOINT * channel)
+                + O22SIOUT.OFFSET_APOINT_MIN
         data = self.ReadBlock(offset, 4)
         return float(self.UnpackReadResponse(data, 'f'))
 ## GetAnalogPointMax
     def GetAnalogPointMax(self, module, channel):
-        offset = O22SIOUT.BASE_APOINT_READ +
-                 (O22SIOUT.OFFSET_APOINT_MOD * module) +
-                 (O22SIOUT.OFFSET_APOINT * channel) +
-                 O22SIOUT.OFFSET_APOINT_MAX
+        offset = O22SIOUT.BASE_APOINT_READ
+                + (O22SIOUT.OFFSET_APOINT_MOD * module)
+                + (O22SIOUT.OFFSET_APOINT * channel)
+                + O22SIOUT.OFFSET_APOINT_MAX
         data = self.ReadBlock(offset, 4)
         return float(self.UnpackReadResponse(data, 'f'))
 
