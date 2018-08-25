@@ -15,65 +15,88 @@ class O22MMP:
 ##
 # ReadRawOffset
     def ReadRawOffset(self, offset, size, data_type):
-        return self.UnpackReadResponse(self.ReadBlock(int(offset, 16), size), data_type)
+        data = self.ReadBlock(int(offset, 16), size)
+        return self.UnpackReadResponse(data, data_type)
 # LastError
     def LastError(self):
         data = self.ReadBlock(O22SIOUT.BASE_LAST_ERROR, 4)
         return str(hex(int(self.UnpackReadResponse(data, 'i')))).upper()[2:]
 # UnitDescription
     def UnitDescription(self):
-        data = O22SIOUT.BASE_UNIT_DESCRIPTION, 12)
-        return self.UnpackReadResponse(self.ReadBlock(data, 'NONE')
+        data = self.ReadBlock(O22SIOUT.BASE_UNIT_DESCRIPTION, 12)
+        return self.UnpackReadResponse(data, 'NONE')
 # FirmwareVersion
     def FirmwareVersion(self):
-        data = O22SIOUT.BASE_FIRMWARE_VERSION, 4)
-        return self.UnpackReadResponse(self.ReadBlock(data, 'FIRMWARE')
+        data = self.ReadBlock(O22SIOUT.BASE_FIRMWARE_VERSION, 4)
+        return self.UnpackReadResponse(data, 'FIRMWARE')
 
 ## Eth0 STATUS
     def IPAddressE0(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS_ETH0, 4), 'IP')
+        data = self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS_ETH0, 4)
+        return self.UnpackReadResponse(data, 'IP')
     def MACAddressE0(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS_ETH0, 6), 'MAC')
+        data = self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS_ETH0, 6)
+        return self.UnpackReadResponse(data, 'MAC')
 ## Eth1 STATUS
     def IPAddressE1(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS_ETH1, 4), 'IP')
+        data = self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS_ETH1, 4)
+        return self.UnpackReadResponse(data, 'IP')
     def MACAddressE1(self):
-        return self.UnpackReadResponse(self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS_ETH1, 6), 'MAC')
+        self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS_ETH1
+        return self.UnpackReadResponse(data, 6), 'MAC')
 
 
 
 ## HD DIGITAL POINTS
 ##
     def GetDigitalPointState(self, module, channel):
-        offset = O22SIOUT.BASE_DPOINT_READ + (module * O22SIOUT.OFFSET_DPOINT_MOD) + (channel * O22SIOUT.OFFSET_DPOINT)
-        return int(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'i'))
+        offset = O22SIOUT.BASE_DPOINT_READ +
+                 (module * O22SIOUT.OFFSET_DPOINT_MOD) +
+                 (channel * O22SIOUT.OFFSET_DPOINT)
+        data = self.ReadBlock(offset, 4), 'i')
+        return int(self.UnpackReadResponse(data)
 ## SetDigitalPointState
     def SetDigitalPointState(self, module, channel, state):
-        offset = O22SIOUT.BASE_DPOINT_WRITE + (module * O22SIOUT.OFFSET_DPOINT_MOD) + (channel * O22SIOUT.OFFSET_DPOINT)
-        return self.UnpackWriteResponse(self.WriteBlock(offset, [0,0,0,state]))
+        offset = O22SIOUT.BASE_DPOINT_WRITE +
+                 (module * O22SIOUT.OFFSET_DPOINT_MOD) +
+                 (channel * O22SIOUT.OFFSET_DPOINT)
+        self.WriteBlock(offset, [0,0,0,state])
+        return self.UnpackWriteResponse(data)
 
 
 ## ANALOG POINTS
 ##
 ## GetAnalogPointValue
     def GetAnalogPointValue(self, module, channel):
-        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
-        return float(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f'))
+        offset = O22SIOUT.BASE_APOINT_READ +
+                 (O22SIOUT.OFFSET_APOINT_MOD * module) +
+                 (O22SIOUT.OFFSET_APOINT * channel)
+        data = self.ReadBlock(offset, 4), 'f')
+        return float(self.UnpackReadResponse(data)
 ## SetAnalogPointValue
     def SetAnalogPointValue(self, module, channel, value):
-        offset = O22SIOUT.BASE_APOINT_WRITE + (O22SIOUT.OFFSET_APOINT_MOD * module) + (O22SIOUT.OFFSET_APOINT * channel)
-        return self.UnpackWriteResponse(self.WriteBlock(offset, self.PackFloat(value)))
+        offset = O22SIOUT.BASE_APOINT_WRITE +
+                 (O22SIOUT.OFFSET_APOINT_MOD * module) +
+                 (O22SIOUT.OFFSET_APOINT * channel)
+        data = self.WriteBlock(offset, self.PackFloat(value))
+        return self.UnpackWriteResponse(data)
 ## MIN / MAX VALUES
 ## GetAnalogPointMin
     def GetAnalogPointMin(self, module, channel):
-        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) +
-                 (O22SIOUT.OFFSET_APOINT * channel) + O22SIOUT.OFFSET_APOINT_MIN
-        return float(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f'))
+        offset = O22SIOUT.BASE_APOINT_READ +
+                 (O22SIOUT.OFFSET_APOINT_MOD * module) +
+                 (O22SIOUT.OFFSET_APOINT * channel) +
+                 O22SIOUT.OFFSET_APOINT_MIN
+        data = self.ReadBlock(offset, 4)
+        return float(self.UnpackReadResponse(data, 'f'))
 ## GetAnalogPointMax
     def GetAnalogPointMax(self, module, channel):
-        offset = O22SIOUT.BASE_APOINT_READ + (O22SIOUT.OFFSET_APOINT_MOD * module) +
-                 (O22SIOUT.OFFSET_APOINT * channel) + O22SIOUT.OFFSET_APOINT_MAX
-        return float(self.UnpackReadResponse(self.ReadBlock(offset, 4), 'f'))
+        offset = O22SIOUT.BASE_APOINT_READ +
+                 (O22SIOUT.OFFSET_APOINT_MOD * module) +
+                 (O22SIOUT.OFFSET_APOINT * channel) +
+                 O22SIOUT.OFFSET_APOINT_MAX
+        data = self.ReadBlock(offset, 4)
+        return float(self.UnpackReadResponse(data, 'f'))
 
 
 ## SCRATCHPAD ACCESS FUNCTIONS
