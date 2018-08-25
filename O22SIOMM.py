@@ -42,7 +42,7 @@ class O22MMP:
         data = self.ReadBlock(O22SIOUT.BASE_IP_ADDRESS_ETH1, 4)
         return self.UnpackReadResponse(data, 'IP')
     def MACAddressE1(self):
-        self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS_ETH1, 6)
+        data = self.ReadBlock(O22SIOUT.BASE_MAC_ADDRESS_ETH1, 6)
         return self.UnpackReadResponse(data, 'MAC')
 
 
