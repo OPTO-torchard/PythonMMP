@@ -160,7 +160,7 @@ class O22MMP:
     def SetScratchPadStringArea(self, index, value):
         if (len(value) > 127): return 'string must be < 128 characters'
         loc = index * O22SIOUT.OFFSET_SCRATCHPAD_STRING
-        if loc < O22SIOUT.MAX_BYTES_STRING):
+        if(loc >= O22SIOUT.MAX_BYTES_STRING):
             return 'index out of bounds'
         offset = O22SIOUT.BASE_SCRATCHPAD_STRING + loc + 0x02 
         hexvals = []
