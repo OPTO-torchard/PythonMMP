@@ -63,7 +63,7 @@ class O22MMP:
         offset = (O22SIOUT.BASE_DPOINT_WRITE
                 + (module * O22SIOUT.OFFSET_DPOINT_MOD)
                 + (channel * O22SIOUT.OFFSET_DPOINT))
-        self.WriteBlock(offset, [0,0,0,state])
+        data = self.WriteBlock(offset, [0,0,0,state])
         return self.UnpackWriteResponse(data)
 
 

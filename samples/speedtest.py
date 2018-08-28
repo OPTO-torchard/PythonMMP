@@ -3,7 +3,7 @@ import O22SIOMM
 grvEpic = O22SIOMM.O22MMP()
 start = timer()
 
-for i in range(100):
+for i in range(101):
     grvEpic.SetDigitalPointState(0, 5, (i%2))
 grvEpic.close()
 
