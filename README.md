@@ -1,17 +1,23 @@
 # PythonMMP
 Opto Memory-Mapped Protocol module for Python
 -----
-... function list and instructions coming "soon" / eventually
 
 * **O22MMP(host)** - Initialize an Opto22 Memory Mapped object residing at 'host' address.
 
 	* **O22MMP()** - Default to `localhost` / `127.0.0.1`
 
+<details><summary>Misc. Functions</summary>
+
 * **ReadRawOffset(offset, size, data_type)** - Rads the raw address at `offset` collecting `size` bytes and using `data_type` formatting to unpack it.
 
-<details><summary>System Status Access Functions</summary>
-
 * **LastError()** - Returns the last error response code.
+
+* **UnitDescription()** - Returns the device unit description. For example, `GRV-EPIC-PR1`
+
+* **FirmwareVersion()** - Returns the device firmware version. For example, 'R1.1a'
+
+</details>
+<details><summary>Ethernet Status Access Functions</summary>
 
 * **IPAddressE0()** - Returns the IP address associated with Ethernet 0 on the controller.
 
@@ -21,16 +27,12 @@ Opto Memory-Mapped Protocol module for Python
 
 * **MACAddressE1()** - Returns the MAC address associated with Ethernet 1 on the controller.
 
-* **UnitDescription()** - Returns the device unit description. For example, `GRV-EPIC-PR1`
-
-* **FirmwareVersion()** - Returns the device firmware version. For example, 'R1.1a'
-
 </details>
 <details><summary>Analog & Digital I/O Access Functions</summary>
 
-* **SetHDDigitalPointState(module, channel, state)** - The HD digital output at `channel` on `module` will be toggled to `state`, which should be either 1 or 0. Returns status code.
+* **SetDigitalPointState(module, channel, state)** - The HD digital output at `channel` on `module` will be toggled to `state`, which should be either 1 or 0. Returns status code.
 
-* **GetHDDigitalPointState(module, channel)** - The state of the HD digital output at `channel` on `module` will be fetched. Returns state either 1 or 0.
+* **GetDigitalPointState(module, channel)** - The state of the HD digital output at `channel` on `module` will be fetched. Returns state either 1 or 0.
 
 
 * **GetAnalogPointValue(module, channel)** - Return the current float value of the analog I/O installed at `channel` on `module`.
