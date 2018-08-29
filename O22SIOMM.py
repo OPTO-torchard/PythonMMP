@@ -298,5 +298,3 @@ class O22MMP:
 ## CLOSE SOCKET / END SESSION
     def close(self):
         self.sock.close()
-
-# written by: Terry Orchard

@@ -1,5 +1,5 @@
-import O22SIOMM
 import sys
+import optommp
 
 from timeit import default_timer as timer
 start = timer()
@@ -9,7 +9,7 @@ value = float(sys.argv[1]) if(len(sys.argv) == 2) else 0
 index = int(sys.argv[1]) if (len(sys.argv) == 3) else 0
 data = sys.argv[2] if (len(sys.argv) ==3) else 'NULL'
 
-grvEpic = O22SIOMM.O22MMP()
+grvEpic = optommp.O22MMP()
 print '\nTerry`s groov EPIC:'
 print 'Writing ' + str(value) + ' to analog at mod1 ch0'
 print 'Initial value  = ' + str(grvEpic.GetAnalogPointValue(1,0))

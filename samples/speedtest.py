@@ -1,6 +1,6 @@
 from timeit import default_timer as timer
-import O22SIOMM
-grvEpic = O22SIOMM.O22MMP()
+import optommp
+grvEpic = optommp.O22MMP()
 start = timer()
 
 for i in range(101):

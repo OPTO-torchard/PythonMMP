@@ -1,7 +1,7 @@
-import O22SIOMM
+import optommp
 import sys
 
-grvEpic = O22SIOMM.O22MMP()
+grvEpic = optommp.O22MMP()
 
 result = grvEpic.GetHDDigitalPointState(int(sys.argv[1]), int(sys.argv[2]))
 print result
