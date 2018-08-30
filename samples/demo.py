@@ -38,21 +38,5 @@ print 'analog max val = ' + str(grvEpic.GetAnalogPointMax(2, 0))
 #print 'Raw read result: ' + str(grvEpic.ReadRawOffset(offset, size, data_type)) + '\n'
 grvEpic.close()
 
-#benEpic = O22SIOMM.O22MMP('10.192.0.152')
-#print '\nBen`s groov EPIC:'
-#print 'ETH 0 MAC addr.: ' + str(benEpic.MACAddressE0())
-#print 'ETH 0 IP addr. : ' + str(benEpic.IPAddressE0())
-#print 'ETH 1 MAC addr.: ' + str(benEpic.MACAddressE1())
-#print 'ETH 1 IP addr. : ' + str(benEpic.IPAddressE1())
-#print 'FirmwareVersion: ' + str(benEpic.FirmwareVersion())
-#print 'UnitDescription: ' + str(benEpic.UnitDescription())
-#print 'LastError      : ' + str(benEpic.LastError())
-#print 'digPt  mod0 ch5= ' + str(benEpic.GetDigitalPointState(0, 5))
-#print 'analog mod2 ch0= ' + str(benEpic.GetAnalogPointValue(2, 0))
-#print 'analog min val = ' + str(benEpic.GetAnalogPointMin(2, 0))
-#print 'analog max val = ' + str(benEpic.GetAnalogPointMax(2, 0))
-#print 'Raw read result: ' + str(benEpic.ReadRawOffset(offset, size, data_type)) + '\n'
-#benEpic.close()
-
 end = timer()
 print '\ntime elapsed = ' + str(end-start) + 's\n'
