@@ -1,8 +1,8 @@
 import optommp
 import sys
 
-channel = int(sys.argv[1])
-module = int(sys.argv[2])
+module = int(sys.argv[1])
+channel = int(sys.argv[2])
 value = float(sys.argv[3])
 
 grvEpic = optommp.O22MMP()
