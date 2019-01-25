@@ -4,13 +4,13 @@ import optommp
 from timeit import default_timer as timer
 start = timer()
 
+# Get some misc. values to write:
 integer = 22
 value = float(sys.argv[1]) if(len(sys.argv) == 2) else 0
 index = int(sys.argv[1]) if (len(sys.argv) == 3) else 0
 data = sys.argv[2] if (len(sys.argv) ==3) else 'NULL'
 
 grvEpic = optommp.O22MMP()
-print '\nTerry`s groov EPIC:'
 print 'Writing ' + str(value) + ' to analog at mod1 ch0'
 print 'Initial value  = ' + str(grvEpic.GetAnalogPointValue(1,0))
 print 'Write success -> ' + str(grvEpic.SetAnalogPointValue(1, 0, value))
