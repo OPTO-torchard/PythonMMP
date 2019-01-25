@@ -16,8 +16,7 @@ grvEpic = optommp.O22MMP()
 
 # Read and print current analog point value:
 print 'old value: ' + str(grvEpic.GetAnalogPointValue(module, channel)
-
-# Write the new value and print whether or not it succeeded:
+# Write the new value and print if there were any errors:
 print 'writing' + str(value) + ' -> ' + str(grvEpic.SetAnalogPointValue(module, channel, value))
 
 # Close the controller when you're finished:
