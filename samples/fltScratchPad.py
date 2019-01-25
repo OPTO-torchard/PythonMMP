@@ -8,7 +8,7 @@ value = float(sys.argv[2]) if(len(sys.argv) > 2) else 22.22
 # Create the controller object:
 grvEpic = optommp.O22MMP()
 
-# Read and print th ecurrent scratch pad value:
+# Read and print the current scratch pad value:
 print 'old value: ' + str(grvEpic.GetScratchPadFloatArea(index))
 # Write the new value and print if there were any errors:
 print 'writing ' + str(value) + ' -> ' + str(grvEpic.SetScratchPadFloatArea(index, value))
