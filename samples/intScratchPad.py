@@ -10,7 +10,7 @@ grvEpic = optommp.O22MMP()
 
 # Read and print the current scratch pad value:
 print 'old value: ' + str(grvEpic.GetScratchPadIntegerArea(index))
-# Write the new value and print whether or not it succeeded:
+# Write the new value and print if there were any errors:
 print 'writing ' + str(value) + ' -> ' + str(grvEpic.SetScratchPadIntegerArea(index, value))
 
 # Close the controller when you're finished:
