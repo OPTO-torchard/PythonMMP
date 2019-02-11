@@ -1,7 +1,7 @@
 import optommp
 import sys
 
-if(len(sys.argv) != 4): # If the module and/or channel are not provided.
+if(len(sys.argv) != 3): # If the module and/or channel are not provided.
         print 'Please provide module # and channel #'
         print 'Exiting script . . .'
         exit() # Inform the user and exit the script.
